@@ -9,7 +9,7 @@ if len(sys.argv) > 1:
     comando = ' '.join(sys.argv[1:])
     saida = subprocess.getoutput(comando)
     tradutor = googletrans.Translator()
-    from linha in saida.splitlines():
+    for linha in saida.splitlines():
         print(tradutor.translate(linha, src='en', dest='pt').text)
 else:
     sys.exit(1)
