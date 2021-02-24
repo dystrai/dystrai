@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 '''
-Miniblog para linha de comandos
+Miniblog para linha de comando
 '''
 
 import argparse

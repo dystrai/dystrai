@@ -7,7 +7,11 @@ from bs4 import BeautifulSoup
 import requests
 
 req = requests.get(sys.argv[1])
-html = BeautifulSoup(req.content, 'html.parser')
-title = html.head.title.text.strip()
+if 'text/html' in req.headers['Content-type']:
+    html = BeautifulSoup(req.content, 'html.parser')
+    if html.text.title is None:
+        title = html.head.title.text.strip()
+    else:
+        title = html.find_all('title')[0].contents[0]
 
-print(f'- [{title}]({req.url})')
+    print(f'- [{title}]({req.url})')
