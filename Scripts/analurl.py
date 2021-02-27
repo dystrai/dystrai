@@ -4,51 +4,105 @@ import subprocess
 import sys
 from urllib.parse import urlparse, parse_qs
 
+ENTER = '\n'
+
 pt_cabecalho_resp = {
-    'Date': 'Data',
-    'Server': 'Servidor',
-    'Last-Modified': 'Última-Modificação',
-    'ETag': 'Etiqueta-eletrônica',
     'Accept-Ranges': 'Aceitar-Intervalos',
-    'Content-Length': 'Comprimento-do-Conteúdo',
+    'Content-Length': 'Comprimento-do-Conteudo',
+    'Content-Type': 'Tipo-de-conteudo',
+    'Date': 'Data',
+    'ETag': 'Etiqueta-eletronica',
+    'Last-Modified': 'Ultima-Modificacao',
+    'Location': 'Localizacao',
+    'Server': 'Servidor',
     'Vary': 'Variar',
-    'Content-Type': 'Tipo-de-conteúdo',
 }
 
-class ReqResp:
+class AbsReqResp:
     def __init__(self, linha, cabecalho):
-        self.linha = linha
-        self.cabecalho = cabecalho
+        self._linha = linha
+        self._cabecalho = cabecalho
+
+    @property
+    def linha(self):
+        return self._linha
+    
+    @property
+    def cabecalho(self):
+        return ENTER.join(self.cabecalho)
 
     def __str__(self):
-        ENTER = '\n'
-        return f'''{self.linha}
-{ENTER.join(self.cabecalho)}
-'''        
+        return ENTER.join([self.linha, self.cabecalho])
 
-class Requisicao(ReqResp):
+class Requisicao(AbsReqResp):
     def __init__(self, linha, cabecalho):
         super().__init__(linha, cabecalho)
 
-class Resposta(ReqResp):
+
+    # https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
+    def como_markdown(self):
+        return f'''\
+
+- Linha de requisição:
+
+  `{self.linha}`
+
+- Análise da linha de requisição:
+
+  | Método | URI Requisitada | Protocolo/versão |
+  | ------ | --------------- | -----------------|
+  | {' | '.join(self.linha.split())} |
+
+- Cabeçalho de requisição
+
+  ```yaml
+  {(ENTER+'  ').join(self._cabecalho)}            
+  ```
+'''
+
+class Resposta(AbsReqResp):
     def __init__(self, linha, cabecalho):
         super().__init__(linha, cabecalho)
         self._traduz_cabecalho()
 
     def _traduz_cabecalho(self):
         traducao = []
-        for linha in self.cabecalho:
+        for linha in self._cabecalho:
             chave,valor = linha.split(':', maxsplit=1)
             if chave in pt_cabecalho_resp:
                 traducao.append(':'.join([pt_cabecalho_resp[chave], valor]))
             else:
                 traducao.append(linha)
-        self.cabecalho_traduzido = traducao
+        self._cabecalho_traduzido = traducao
 
-    def cadeia_cabecalho_traduzido(self):
-        ENTER = '\n'
-        return f'''{self.linha}
-{ENTER.join(self.cabecalho_traduzido)}
+    @property
+    def cabecalho_traduzido(self):
+        return ENTER.join(self.cabecalho_traduzido)
+
+    def como_markdown(self):
+        return f'''\
+- Linha de resposta:
+
+  `{self.linha}`
+
+- Análise da linha de resposta:
+
+  | Protocolo/versão | Código de retorno | Mensagem |
+  | ---------------- | ----------------- | -------- |
+  | {' | '.join(self.linha.split(maxsplit=3))} |
+
+- Cabeçalho de resposta
+
+  ```yaml
+  {(ENTER+'  ').join(self._cabecalho)}            
+  ```
+
+- Tradução (parcial) do cabeçalho de resposta
+
+  ```yaml
+  {(ENTER+'  ').join(self._cabecalho_traduzido)}            
+  ```
+
 '''
 
 def separador_req_resp(url: str):
@@ -75,25 +129,37 @@ porta_padrao = {
     'https': 443,
 }
 
-def analisa_url(url: str):
+def analisa_url(url: str) -> str:
     analise = urlparse(url)
-    print('Esquema (scheme):', analise.scheme)
-    print('Host:', analise.hostname)
-    if analise.port:
-        print('Porta:', analise.port)
-    else:
-        print('Porta:', porta_padrao[analise.scheme])
-    print('Caminho (path):', analise.path)
-    print('Consulta (query string):', analise.query)
-    print('Fragmento:', analise.fragment)
+    porta = analise.port if analise.port else porta_padrao[analise.scheme]
+        
+    return f'''\
+| Chave | Valor |
+| ----- | ----- |
+| Esquema (scheme) |  {analise.scheme} |
+| Host |  {analise.hostname} |
+| Porta | {porta} |
+| Caminho (path) |  {analise.path} |
+| Consulta (query string) | {analise.query} |
+| Fragmento |  {analise.fragment} |
+
+'''
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         url = sys.argv[1]
-        analisa_url(url)
-        req,resp = separador_req_resp(url)
-        print('REQUISIÇÃO:')
-        print(req)
+
+        print('# Laboratório HTTP')
         print()
-        print('RESPOSTA:')
-        print(resp.cadeia_cabecalho_traduzido())
+        print(f'- URL: \<<{url}>\>')
+        print ('## Análise da URL')
+        print(analisa_url(url))
+
+        req,resp = separador_req_resp(url)
+
+        print('## Análise da requisição')
+        print(req.como_markdown())
+
+        print('## Análise da resposta')    
+        print(resp.como_markdown())
+
