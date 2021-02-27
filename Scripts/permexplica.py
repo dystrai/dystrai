@@ -43,6 +43,53 @@ tipos = {
     's': 'Arquivo de socket',
 }
 
+class Permissao:
+    def __init__(self, entidade: str, permissoes: str, tipo: str):
+        assert len(permissoes) == 3
+        print(permissoes)
+        self._r, self._w, self._x = list(permissoes)
+        self.entidade = entidade
+        self.tipo = tipo
+
+    def analisa(self):
+        if self._r == 'r':
+            print(f'[r]: {self.entidade} pode(m) ler.')
+        elif self._r == '-':
+            print(f'[-]: {self.entidade} não pode(m) ler.')
+        if self._w == 'w':
+            print(f'[w]: {self.entidade} pode(m) gravar/escrever.')
+        elif self._w == '-':
+            print(f'[-]: {self.entidade} não pode(m) gravar/escrever.')
+        if self._x == 'x' and self.tipo!='d':
+            print(f'[x]: {self.entidade} pode(m) executar.')
+            if self.tipo == 'd':
+                print(f'[x]: {self.entidade} pode(m) entrar nesse diretório.')
+        elif self._x == '-':
+            print(f'[-]: {self.entidade} não pode(m) executar.')            
+            if self.tipo == 'd':
+                print(f'[-]: {self.entidade} não pode(m) entrar nesse diretório.')
+        elif self._x == 's' and self.entidade == 'u' and self.tipo == '-':
+            print(f'[s]: SetUID habilitado para arquivo. O programa será executado em nome de seu proprietário.')
+        elif self._x == 's' and self.entidade == 'g' and self.tipo == '-':
+            print('[s]: SetGID habilitado para arquivo. O programa será executado em nome de seu grupo proprietário.')
+        elif self._x == 's' and self.entidade == 'g' and self.tipo == 'd':
+            print('[s]: Set GID habilitado para diretório. Os arquivos criados dentro dele pertencerão ao grupo proprietário.')
+        elif self._x == 't' and self.tipo == 'd':
+            print('[t]: Sticky bit habilitado para diretório. Um usuário não pode excluir o que outro criou.')
+
+    @property
+    def r(self):
+        return self._r == 'r'
+
+    @property
+    def w(self):
+        return self._w == 'w'
+
+    @property
+    def x(self):
+        return self._x == 'x'
+    
+
 def explica_tipo(caminho: pathlib.Path, argsys: str):
     if caminho.exists():
         if caminho.is_dir():
@@ -72,6 +119,9 @@ Para ver suas permissões, acrescente a oção <{ls_ops}> ao comando <ls>:
                             capture_output=True, 
                             text=True)
         saida = ps.stdout
+        print('Saída do comando:')
+        print(saida)
+        input('Pressione <ENTER> para continuar.')
         tperms,nlinks,udono,gdono,tam,mes,dia,hora,arq = saida.split(maxsplit=9)
         tipo = tperms[0]
         perms = tperms[1:]
@@ -79,12 +129,12 @@ Para ver suas permissões, acrescente a oção <{ls_ops}> ao comando <ls>:
         gperms = perms[3:6]
         operms = perms[6:]
         mgdono = grp.getgrnam(gdono).gr_mem
-        print(f'{nome}, observe o tipo e permissões: {tperms}')
+        print(f'{nome}, observe o tipo e permissões:\n {tperms}')
         print('Procure interpretá-los assim:')
         print(f'''\
+ 0  123  456  789            
  {tipo}  {uperms}  {gperms}  {operms}
  |  \_/  \_/  \_/
- 0  123  456  789
  T   U    G    O
 
  0: Tipo ({tipo})
@@ -102,19 +152,25 @@ Para ver suas permissões, acrescente a oção <{ls_ops}> ao comando <ls>:
             pass
         while glido := input(f'{nome}, qual é o grupo proprietário desse {tipo_basico}? ') != gdono:
             pass
-        print('Faremos a divisão UGO para elas.')
+        print('Faremos a divisão UGO para as permissões.')
         while pulidas := input(f'Caracteres com permissões para o usuário <{udono}>: ') != uperms:
             pass
         print(f'Permissões para [U]suário: {uperms}')
         print('', '\n '.join(list(uperms)))
+        permissao = Permissao('u', uperms, tipo)
+        permissao.analisa()
         while pglidas := input(f'Caracteres com permissões para membros do grupo <{gdono}>: ') != gperms:
             pass
         print(f'Permissões para [G]rupo: {gperms}')
         print('', '\n '.join(list(gperms)))
+        permissao = Permissao('g', gperms, tipo)
+        permissao.analisa()
         while polidas := input(f'Caracteres com permissões para os outros: ') != operms:
             pass
         print(f'Permissões para [O]utros: {operms}')
         print('', '\n '.join(list(operms)))
+        permissao = Permissao('o', operms, tipo)
+        permissao.analisa()
         
         # for i,c in enumerate(tperms)
     else:
@@ -134,5 +190,3 @@ Uso:
 
 if __name__ == '__main__':
     main()
-
-
