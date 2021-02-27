@@ -29,7 +29,7 @@ class AbsReqResp:
     
     @property
     def cabecalho(self):
-        return ENTER.join(self.cabecalho)
+        return ENTER.join(self._cabecalho)
 
     def __str__(self):
         return ENTER.join([self.linha, self.cabecalho])
@@ -77,7 +77,7 @@ class Resposta(AbsReqResp):
 
     @property
     def cabecalho_traduzido(self):
-        return ENTER.join(self.cabecalho_traduzido)
+        return ENTER.join(self._cabecalho_traduzido)
 
     def como_markdown(self):
         return f'''\
@@ -129,37 +129,103 @@ porta_padrao = {
     'https': 443,
 }
 
-def analisa_url(url: str) -> str:
-    analise = urlparse(url)
-    porta = analise.port if analise.port else porta_padrao[analise.scheme]
-        
-    return f'''\
+class URL:
+    def __init__(self, url: str):
+        self._url = url
+        self._analisa()
+
+    @property
+    def nome(self):
+        return self._url
+
+    def _analisa(self):
+        analise = urlparse(self._url)
+        self.porta = analise.port if analise.port else porta_padrao[analise.scheme]
+        self.caminho = analise.path if analise.path else '/'
+        self.esquema   = analise.scheme
+        self.loc_rede   = analise.netloc
+        self.parametros   = analise.params
+        self.consulta    = analise.query
+        self.fragmento = analise.fragment
+        self.usuario = analise.username
+        self.senha = analise.password
+        self.computador = analise.hostname
+
+    def como_tabela_markdown(self):
+        return f'''\
 | Chave | Valor |
 | ----- | ----- |
-| Esquema (scheme) |  {analise.scheme} |
-| Host |  {analise.hostname} |
-| Porta | {porta} |
-| Caminho (path) |  {analise.path} |
-| Consulta (query string) | {analise.query} |
-| Fragmento |  {analise.fragment} |
-
+| Esquema (scheme) |  {self.esquema} |
+| Computador |  {self.computador} |
+| Porta | {self.porta} |
+| Caminho (path) |  {self.caminho} |
+| Consulta (query string) | {self.consulta} |
+| Fragmento |  {self.fragmento} |
 '''
 
+    def __str__(self):
+        return self._url
+
+    def __repr__(self):
+        return self._url
+
+def req_resp_como_puml(vc: str, req: Requisicao, resp: Resposta, url: URL):
+    return f'''\
+@startuml
+actor "{vc}" as vc
+participant "Navegador Web" as nav
+participant "{url.computador}:{url.porta}" as host
+vc -> nav: {url}
+nav -> host: {req.linha}
+note left
+{req.cabecalho}
+end note
+host -> nav: {resp.linha}
+note right
+{req.cabecalho}
+end note
+nav -> nav: Vou analisar a resposta
+note left
+Se for um documento HTML,
+preciso solicitar mais objetos
+(Ex.: CSS, JavaScript, imagens)
+para <{url.computador}> ou outros
+hosts, dependendo da análise.
+end note
+nav -> vc: Página linda, maravilhosa e perfurmada
+@enduml
+'''        
+    
+
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        url = sys.argv[1]
+    pass
 
-        print('# Laboratório HTTP')
-        print()
-        print(f'- URL: \<<{url}>\>')
-        print ('## Análise da URL')
-        print(analisa_url(url))
+if len(sys.argv) == 3:
+    vc = sys.argv[1]
+    url = URL(sys.argv[2])
+    req,resp = separador_req_resp(url.nome)    
 
-        req,resp = separador_req_resp(url)
+    print('# Lab. HTTP')
+    print(f'- URL: \<<{url}>\>')
 
-        print('## Análise da requisição')
-        print(req.como_markdown())
+    print('## Diagrama')
+    print(f'''Vamos ver um diagrama de sequência com a interação entre:
 
-        print('## Análise da resposta')    
-        print(resp.como_markdown())
+1. Você {vc}
+2. Seu navegador web predileto (Chrome, Edge, Firefox, Opera, Safari etc.)
+3. O servidor (*{url.loc_rede}*) que hospeda o objeto solicitado (*{url.caminho}*).
+''')
+    print(req_resp_como_puml(vc, req, resp, url))
+
+    print ('## A URL')
+    print()
+    print(url.como_tabela_markdown())
+
+    print('## Request')
+    print('Vamos analisar a requisição.')
+    print(req.como_markdown())
+
+    print('## Response')    
+    print('Vamos analisar a resposta.')
+    print(resp.como_markdown())
 
