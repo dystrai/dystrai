@@ -8,6 +8,7 @@ ENTER = '\n'
 
 pt_cabecalho_resp = {
     'Accept-Ranges': 'Aceitar-Intervalos',
+    'Connection': 'Conexão',
     'Content-Length': 'Comprimento-do-Conteudo',
     'Content-Type': 'Tipo-de-conteudo',
     'Date': 'Data',
@@ -36,6 +37,7 @@ class AbsReqResp:
 
 class Requisicao(AbsReqResp):
     def __init__(self, linha, cabecalho):
+        linha = ' '.join(['GET', linha.split(maxsplit=1)[1]])
         super().__init__(linha, cabecalho)
 
 
@@ -56,8 +58,14 @@ class Requisicao(AbsReqResp):
 - Cabeçalho de requisição
 
   ```yaml
-  {(ENTER+'  ').join(self._cabecalho)}            
+  {(ENTER+'  ').join(self._cabecalho).replace('Accept: */*', 'Accept: "*/*"')}            
   ```
+
+  ```{{note}}
+  O valor associado ao campo **Accept:** foi exibido entre aspas duplas 
+  para que o cabeçalho de requisição pudesse ser destacado como um arquivo 
+  no formato [YAML](https://yaml.org/).
+  ```  
 '''
 
 class Resposta(AbsReqResp):
@@ -89,7 +97,7 @@ class Resposta(AbsReqResp):
 
   | Protocolo/versão | Código de retorno | Mensagem |
   | ---------------- | ----------------- | -------- |
-  | {' | '.join(self.linha.split(maxsplit=3))} |
+  | {' | '.join(self.linha.split(maxsplit=2))} |
 
 - Cabeçalho de resposta
 
@@ -106,7 +114,8 @@ class Resposta(AbsReqResp):
 '''
 
 def separador_req_resp(url: str):
-    ps = subprocess.run(['curl', '-v', url], 
+
+    ps = subprocess.run(['curl', '-I', '-v', url], 
                         capture_output=True, 
                         text=True,
                         check=True)
@@ -131,7 +140,7 @@ porta_padrao = {
 
 class URL:
     def __init__(self, url: str):
-        self._url = url
+        self._url = url.strip()
         self._analisa()
 
     @property
@@ -141,7 +150,7 @@ class URL:
     def _analisa(self):
         analise = urlparse(self._url)
         self.porta = analise.port if analise.port else porta_padrao[analise.scheme]
-        self.caminho = analise.path if analise.path else '/'
+        self.caminho = analise.path.strip() if analise.path else '/'
         self.esquema   = analise.scheme
         self.loc_rede   = analise.netloc
         self.parametros   = analise.params
@@ -171,6 +180,7 @@ class URL:
 
 def req_resp_como_puml(vc: str, req: Requisicao, resp: Resposta, url: URL):
     return f'''\
+```{{uml}}        
 @startuml
 actor "{vc}" as vc
 participant "Navegador Web" as nav
@@ -194,25 +204,27 @@ hosts, dependendo da análise.
 end note
 nav -> vc: Página linda, maravilhosa e perfurmada
 @enduml
+```
 '''        
     
 
 if __name__ == '__main__':
     pass
 
-if len(sys.argv) == 3:
+if len(sys.argv) == 4:
     vc = sys.argv[1]
-    url = URL(sys.argv[2])
+    ordem = sys.argv[2]
+    url = URL(sys.argv[3])
     req,resp = separador_req_resp(url.nome)    
 
-    print('# Lab. HTTP')
-    print(f'- URL: \<<{url}>\>')
+    print(f'# Lab. HTTP -- Análise {ordem} para {vc}')
+    print(f'- URL: \<<{url.nome}>\>')
 
     print('## Diagrama')
     print(f'''Vamos ver um diagrama de sequência com a interação entre:
 
-1. Você {vc}
-2. Seu navegador web predileto (Chrome, Edge, Firefox, Opera, Safari etc.)
+1. Você {vc},
+2. Seu navegador web predileto (Chrome, Edge, Firefox, Opera, Safari etc.), e
 3. O servidor (*{url.loc_rede}*) que hospeda o objeto solicitado (*{url.caminho}*).
 ''')
     print(req_resp_como_puml(vc, req, resp, url))
