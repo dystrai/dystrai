@@ -6,6 +6,7 @@ import pathlib
 import pwd
 import subprocess
 import sys
+from termcolor import colored
 
 gecos = pwd.getpwnam(getpass.getuser()).pw_gecos
 if ',' in gecos:
@@ -133,7 +134,7 @@ Para ver suas permissões, acrescente a oção <{ls_ops}> ao comando <ls>:
         print('Procure interpretá-los assim:')
         print(f'''\
  0  123  456  789            
- {tipo}  {uperms}  {gperms}  {operms}
+ {colored(tipo, 'red')}  {colored(uperms, 'green')}  {colored(gperms, 'blue')}  {colored(operms, 'yellow')}
  |  \_/  \_/  \_/
  T   U    G    O
 
@@ -177,16 +178,17 @@ Para ver suas permissões, acrescente a oção <{ls_ops}> ao comando <ls>:
         print('Arquivo ou diretório não encontrado.')
 
 def main():
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print(f'''\
 Uso:
   {sys.argv[0]} /caminho/para/arquivo-ou-diretório
 ''')
         sys.exit(1)
     else:
-        obj = sys.argv[1]
-        caminho = pathlib.Path(obj)
-        explica_tipo(caminho, obj)
+        for arg in sys.argv[1:]:
+            obj = arg
+            caminho = pathlib.Path(obj)
+            explica_tipo(caminho, obj)
 
 if __name__ == '__main__':
     main()

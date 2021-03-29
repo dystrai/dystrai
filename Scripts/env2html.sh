@@ -12,7 +12,7 @@ tb_header=$(cat << FIM
 FIM
 )
 
-tb_body=$(env | sed 's/.*/|&|/;s/=/|/')
+tb_body=$(env | sort | sed 's/.*/|&|/;s/=/|/')
 
 cat << EOF | pandoc -f gfm -t html -
 $pg_header
