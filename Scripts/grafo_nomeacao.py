@@ -62,6 +62,9 @@ USR = getuser()
 PID = getpid()
 DCR = f'/var/www/html/sd20202/{USR}'
 PNG = f'{DCR}/{PID}'
+URL = f'https://turmas.oulu.ifrn.edu.br/sd20202/{USR}/{PID}.png'
 makedirs(DCR, mode=0o755, exist_ok=True)
 dot.render(PNG, view=False)
+print('Grafo gerado e salvo em:')
+print(f'  {URL}')
 
