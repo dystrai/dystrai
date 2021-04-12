@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+# A Fazer: criar um nó inicial vazio, 
+# para ter aresta inicial com nome do início 
+# do caminho: Ex.: 
+#   '/'
+#   './'
+#   './diretorio'
+
 from collections import defaultdict
 from getpass import getuser
 from os import makedirs, stat, getpid
