@@ -35,12 +35,13 @@ def ip2dot(end_ipv4: ipaddress.IPv4Interface):
 def main():
     pass
 
-interpretador = argparse.ArgumentParser()
-interpretador.add_argument('endereco_cidr', help='Endereço IPv4 com CIDR. Exemplo: 192.168.7.6/25')
-args = interpretador.parse_args()
+# interpretador = argparse.ArgumentParser()
+# interpretador.add_argument('endereco_cidr', help='Endereço IPv4 com CIDR. Exemplo: 192.168.7.6/25')
+# args = interpretador.parse_args()
 
+endereco_cidr = input('Endereço IPv4 da interface com notação CIDR: ')
 
-padrao_end = re.match('(?P<octeto1>\d+)\.(?P<octeto2>\d+)\.(?P<octeto3>\d+)\.(?P<octeto4>\d+)/(?P<compr_prefixo>\d+)', args.endereco_cidr)
+padrao_end = re.match('(?P<octeto1>\d+)\.(?P<octeto2>\d+)\.(?P<octeto3>\d+)\.(?P<octeto4>\d+)/(?P<compr_prefixo>\d+)', endereco_cidr)
 
 if not padrao_end:
     sys.stderr.write('Argumento não corresponde a um endereço CIDR\n')
@@ -137,7 +138,7 @@ prompt = f'Como você representaria, no formato de notação decimal pontilhada,
 masc_dec = input(prompt)
 while masc_dec != resp_masc_dec:
     print('Você está quase lá. Tente novamente.')
-    masc_bin = input(prompt)
+    masc_dec = input(prompt)
 
 print('Estamos quase lá!')
 print('Falta só você calcular: 1) O endereço de rede; 2) O endereço de broadcast.') 
@@ -147,8 +148,12 @@ print('''O endereço de rede é resultado da operação AND (E da lógica boolea
  o endereço na resebinário da máscara.
  ''')
 
-print('.'.join(octetos_bin))
-print('.'.join(octs_bin_masc))
+print('Binário da Interface:', '.'.join(octetos_bin))
+print('Binário da   Máscara:', '.'.join(octs_bin_masc))
+end_rede_bin = input('Binário da      Rede: ')
+
+end_red_dec = input('Endereço da rede em notação decimal pontilhada: ')
+end_broadcast_dec = input('Endereço de broadcast na notação decimal pontilhada: ')
 
 if __name__ == '__main__':
     main()
