@@ -35,11 +35,12 @@ def ip2dot(end_ipv4: ipaddress.IPv4Interface):
 def main():
     pass
 
-# interpretador = argparse.ArgumentParser()
-# interpretador.add_argument('endereco_cidr', help='Endereço IPv4 com CIDR. Exemplo: 192.168.7.6/25')
-# args = interpretador.parse_args()
+interpretador = argparse.ArgumentParser()
+interpretador.add_argument('endereco_cidr', help='Endereço IPv4 com CIDR. Exemplo: 192.168.7.6/25')
+args = interpretador.parse_args()
 
-endereco_cidr = input('Endereço IPv4 da interface com notação CIDR: ')
+endereco_cidr = args.endereco_cidr
+#endereco_cidr = input('Endereço IPv4 da interface com notação CIDR: ')
 
 padrao_end = re.match('(?P<octeto1>\d+)\.(?P<octeto2>\d+)\.(?P<octeto3>\d+)\.(?P<octeto4>\d+)/(?P<compr_prefixo>\d+)', endereco_cidr)
 
@@ -134,26 +135,93 @@ octs_bin_masc = [resp_masc_bin[8*i:8*(i+1)] for i in range(4)]
 octs_dec_masc = [int(oct_bin, base=2) for oct_bin in octs_bin_masc]
 resp_masc_dec = '.'.join([str(dec) for dec in octs_dec_masc])
 
+print(30*'-')
 prompt = f'Como você representaria, no formato de notação decimal pontilhada, a máscara com CIDR /{comp_prefixo}?\n'
 masc_dec = input(prompt)
 while masc_dec != resp_masc_dec:
     print('Você está quase lá. Tente novamente.')
     masc_dec = input(prompt)
 
+print(30*'-')
 print('Estamos quase lá!')
 print('Falta só você calcular: 1) O endereço de rede; 2) O endereço de broadcast.') 
 print('Vamos descobrir o endereço de rede...')
 print('''O endereço de rede é resultado da operação AND (E da lógica booleana)
- entre o endereço na representação binário da interface de rede e 
- o endereço na resebinário da máscara.
+ entre o endereço na representação binária da interface de rede e 
+ o endereço binário da máscara.
  ''')
 
-print('Binário da Interface:', '.'.join(octetos_bin))
-print('Binário da   Máscara:', '.'.join(octs_bin_masc))
-end_rede_bin = input('Binário da      Rede: ')
+ip_bin = ''.join(octetos_bin)
+masc_bin = ''.join(octs_bin_masc)
 
-end_red_dec = input('Endereço da rede em notação decimal pontilhada: ')
-end_broadcast_dec = input('Endereço de broadcast na notação decimal pontilhada: ')
+tab_inversao = str.maketrans('01', '10')
+curinga_bin = str.translate(masc_bin, tab_inversao)
+octs_cur_bin = [curinga_bin[8*i:8*(i+1)] for i in range(4)]
+
+rede_int10 = int(ip_bin, 2) & int(masc_bin, 2)
+rede_bin = f'{rede_int10:034b}'[2:]
+octs_rede_bin = [rede_bin[8*i:8*(i+1)] for i in range(4)]
+rede_dec = [int(oct_bin, base=2) for oct_bin in octs_rede_bin]
+
+broad_int10 = int(rede_bin, 2) ^ int(curinga_bin, 2)
+broad_bin = f'{broad_int10:034b}'[2:]
+octs_broad_bin = [broad_bin[8*i:8*(i+1)] for i in range(4)]
+broad_dec = [int(octeto, base=2) for octeto in octs_broad_bin]
+
+print(30*'-')
+while True:
+    print('End. binário da Interface:', '.'.join(octetos_bin))
+    print('End. binário da   Máscara:', '.'.join(octs_bin_masc))
+    end_rede_bin = input('End. binário da      Rede: ')
+    if end_rede_bin.replace('.', '') == rede_bin:
+        print('Muito bem!')
+        break
+
+    print('Você está quase lá. Tente novamente.')
+
+print(30*'-')
+resp_rede_dec = '.'.join([str(octeto) for octeto in rede_dec])
+prompt = 'Endereço da rede em notação decimal pontilhada: '
+end_red_dec = input(prompt)
+while end_red_dec != resp_rede_dec:
+    print('Você está quase lá. Tente novamente.')
+    end_red_dec = input(prompt)
+
+
+print(30*'-')
+print('Vamos calcular o curinga (inverter) da máscara de sub-rede?')
+while True:
+    print('End. binário da Máscara:', '.'.join(octs_bin_masc))
+    cur_bin = input('End. inverso da Máscara: ')
+    if cur_bin.replace('.', '') == curinga_bin:
+        print('Muito bem!')
+        break
+
+    print('Você está quase lá. Tente novamente.')
+
+print(30*'-')
+print('Vamos descobrir o endereço de broadcast...')
+print('''O endereço de broadcast é resultado da operação XOR (OU exclusivo
+ da lógica booleana) entre o endereço IP da rede na representação 
+ binária e curinga da máscara de sub-rede (a máscara invertida).
+ ''')
+
+while True:
+    print('End. binário da      rede:', '.'.join(octs_rede_bin))
+    print('End. binário do   curinga:', '.'.join(octs_cur_bin))
+    end_broad_bin = input('End. binário de broadcast: ')
+    if end_broad_bin.replace('.', '') == broad_bin:
+        print('Muito bem!')
+        break
+
+    print('Você está quase lá. Tente novamente.')
+
+resp_broad_dec = '.'.join([str(int(octeto, 2)) for octeto in octs_broad_bin])
+prompt = 'Endereço de broadcast na notação decimal pontilhada: '
+end_broad_dec = input(prompt)
+while end_broad_dec != resp_broad_dec:
+    print('Você está quase lá. Tente novamente.')
+    end_broad_dec = input(prompt)
 
 if __name__ == '__main__':
     main()
