@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Dependências: git e meld
+# No Debian/Ubuntu: sudo apt install -y git meld
+
 # Passeio por todos os commits de um projeto
 # A fazer:
 #    Verificar: git config --global diff.tool
@@ -15,6 +18,7 @@ for i in $(seq 0 $(($hashes_len-2)))
     do
         clear
         echo "Comparação $((i+1)) de ${hashes_len}"
+        echo
         git --no-pager log ${hashes[i]}..${hashes[$((i+1))]}
         # https://stackoverflow.com/questions/2006032/view-differences-of-branches-with-meld
         git difftool -d ${hashes[i]}..${hashes[$((i+1))]}
