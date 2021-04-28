@@ -23,7 +23,7 @@ fi
 dt=$(git config --global diff.tool)
 # https://www.cyberciti.biz/faq/unix-linux-bash-script-check-if-variable-is-empty/
 if [ -z "$dt" ]; then
-    echo "Configure uma ferramenta para visualização de diferenças"
+    echo "Configure uma ferramenta para visualização de diferenças."
     exit 1
 fi
 
