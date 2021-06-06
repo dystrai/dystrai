@@ -46,7 +46,7 @@ for cap in range(QT_CAPS):
         fim_art[art] = ini_art[art+1]
     fim_art[arts_cap[cap][-1]] = fim_cap[cap]
 
-os.makedirs('docs')
+os.makedirs('docs', exist_ok=True)
 
 QT_ARTS = len(ini_art)
 artigos = {}
@@ -63,7 +63,7 @@ for art in range(1, QT_ARTS+1):
 ''')
 
 for cap in range(QT_CAPS):
-    with open(os.path.join('docs', f'capitulo-{cap}.md'), mode='w', encoding='utf-8') as arq_cap:
+    with open(os.path.join('docs', f'capitulo-{cap+1}.md'), mode='w', encoding='utf-8') as arq_cap:
         arq_cap.write(f'''\
 # Capítulo {num_cap[cap]} -- {linhas[ini_cap[cap]+1].lower().capitalize()}
 
