@@ -1,5 +1,7 @@
-#! /usr/bin/env python3
-
+#!/usr/bin/env python3
+'''
+Save Markdown page with title and link for an URL
+'''
 import os
 import sys
 
@@ -32,8 +34,12 @@ def main():
         for url in sys.argv[1:]:
             save_page_link(url)
     else:
-        while (url := input('URL: ')):
-            save_page_link(url)
+        try:
+            while (url := input('URL: ')):
+                save_page_link(url)
+        except EOFError as erro:
+            pass        
+
 
 if __name__ == '__main__':
     main()
