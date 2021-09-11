@@ -69,8 +69,8 @@ def passeia_nos_filhos(caminho: Caminho, nome=str, grafo=Digraph) -> None:
         caminho.visitado = True
 
 def desenha_grafo():
-    g_nome = 'caminhos' #sys.argv[1]
-    g_titulo = 'Caminhos' #sys.argv[2]
+    g_nome = sys.argv[1]
+    g_titulo = sys.argv[2]
     grafo = Digraph(g_nome, format='png', strict=True)
     grafo.attr('graph', rankdir='LR')
     # https://stackoverflow.com/questions/6450765/how-do-you-center-a-title-for-a-diagram-output-to-svg-using-dot
@@ -92,13 +92,13 @@ def desenha_grafo():
 
 def principal():
     args = sys.argv
-    if len(args) < 2:
+    if len(args) < 4:
         print(f'''\
 Uso:
-  {sys.argv[0]} CAMINHO [CAMINHO...]''')
+  {sys.argv[0]} NOME TITULO CAMINHO [CAMINHO...]''')
         sys.exit(1)
 
-    for a in args[1:]:
+    for a in args[3:]:
         path = Path(a).resolve()
         partes = path.parts
         global caminhos
@@ -116,32 +116,3 @@ Uso:
 
 if __name__ == '__main__':
     principal()
-
-
-
-
-# def main():
-#     if len(sys.argv) < 4:
-#         print(f'''\
-# Uso:
-#   {sys.argv[0]} CAMINHO [CAMINHO...]
-# ''')
-#         sys.exit(1)
-
-#     gname = sys.argv[1]
-#     grafo = Digraph(sys.argv[1], format='png', strict=True)
-#     grafo.attr('graph', rankdir='LR')
-#     # https://stackoverflow.com/questions/6450765/how-do-you-center-a-title-for-a-diagram-output-to-svg-using-dot
-#     grafo.attr('graph', label=sys.argv[2])
-#     grafo.attr('graph', labelloc='t')
-#     # grafo.attr('graph', splines='false') # linhas retas (straight lines)
-
-#     for caminho in sys.argv[2:]:
-#         atualizar_grafo(grafo, Path(caminho))
-
-#     grafo.view()
-#     grafo.render()
-#     shutil.move(f'{gname}.gv.png', f'{gname}.png')
-
-# if __name__ == '__main__':
-#   main()
