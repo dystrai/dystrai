@@ -37,6 +37,7 @@ class Caminho:
                 else:
                     self.id_caminho = chave_candidata
                     caminho_id[chave_candidata] = self
+                self.id_caminho = chave_candidata
             else:
                 self.id_caminho = nome_base
         else: # nome_base not in caminho_id:
@@ -85,7 +86,7 @@ def desenha_grafo():
         grafo.node(name=nome, label=etiqueta, shape= forma)
         passeia_nos_filhos(caminho, nome=nome, grafo=grafo)
 
-    grafo.view()
+    #grafo.view()
     grafo.render()
     #shutil.move(f'{g_nome}.gv.png', f'{g_nome}.png')
 
