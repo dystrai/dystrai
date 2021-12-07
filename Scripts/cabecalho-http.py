@@ -14,8 +14,6 @@ def exibir_cabecalho(url) -> str:
     
     return ''
 
-print(sys.argv)
-
 if len(sys.argv) > 1:
     for url in sys.argv[1:]:
         print(exibir_cabecalho(url))
