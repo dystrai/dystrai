@@ -11,12 +11,12 @@ class Argumento:
         self.arg = arg if " " not in arg else f"'{arg}'"
         self.num = num
         if len(arg) == 1:
-            self.chaves = '|'
+            self.ornamento = '|'
         elif not " " in arg:
-            self.chaves = f'\\{"_"*(len(arg)-2)}/'
+            self.ornamento = f'\\{"_"*(len(arg)-2)}/'
         else:
-            self.chaves = f'\\{"_"*(len(arg))}/'
-        self.num_centralizado = str(self.num).center(len(self.chaves), ' ')
+            self.ornamento = f'\\{"_"*(len(arg))}/'
+        self.num_centralizado = str(self.num).center(len(self.ornamento), ' ')
 
     def __str__(self) -> str:
         return self.arg
