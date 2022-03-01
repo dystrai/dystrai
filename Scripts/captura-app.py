@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
+import atexit
 from datetime import datetime
+import os
 import pathlib
 import subprocess
 
-PROTOCOLOS = ('ftp', 'ftp-data', 'telnet', 'dns', 'smtp', 'pop3', 'imap', 'http')
 DIR_CAPTURAS = '/var/www/html/capturas/'
 
-portas_protocolo = {
+porta_protocolo = {
     'ftp-data':  ('tcp', 20),
     'ftp':  ('tcp', 21),
     'telnet':  ('tcp', 23),
@@ -17,17 +18,19 @@ portas_protocolo = {
     'pop3': ('tcp', 110),
     'imap': ('tcp', 143),
     'http': ('tcp', 80),
+    'bootps': ('udp', '67'),
+    'bootpc': ('udp', '68'),
 }
 
+PROTOCOLOS = tuple(porta_protocolo.keys())
+
 analisador = argparse.ArgumentParser(description='Capturador de pacotes da camada de aplicação')
-analisador.add_argument('-v', '--verbose', action='store_true', help='Visualiza o que o comando irá executar')
 analisador.add_argument('protocolo', nargs='+', choices=PROTOCOLOS)
 
 args = analisador.parse_args()
 regras = []
 protocolos = args.protocolo
 interface = 'any'
-verboso = args.verbose
 
 for proto in protocolos:
     transp,porta = portas_protocolo[proto]
@@ -43,17 +46,23 @@ nome_arq_captura = f"captura_{'_e_'.join(protocolos)}_em_{agora.strftime('%F-às
 dir_captura = pathlib.Path(DIR_CAPTURAS)
 caminho_arq_captura = dir_captura / nome_arq_captura
 
+def muda_perm():
+    global caminho_arq_captura
+    os.chmod(caminho_arq_captura, mode=0o0644)
+    print(f'Captura salva em: {caminho_arq_captura}')
+
+atexit.register(muda_perm)
+
 cmd = 'tshark'
 cmd_args = [
     '-i', interface,
     '-f', f'{filtro}',
-    '-c', '30',
     '-w', caminho_arq_captura.as_posix(),
 ]
 
+print("Pressione CTRL+C para cancelar a captura.")
 cmd_e_args = [cmd]+cmd_args
-if verboso:
-    print(' '.join(cmd_e_args))
+print(' '.join(cmd_e_args))
 
 resultado = subprocess.run(cmd_e_args, stdout=subprocess.PIPE)
 print(resultado)

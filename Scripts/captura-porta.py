@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
+import atexit
 from datetime import datetime
+import os
 import pathlib
 import subprocess
 
 DIR_CAPTURAS = '/var/www/html/capturas/'
 
 analisador = argparse.ArgumentParser(description='Capturador de pacotes da camada de transporte')
-analisador.add_argument('-v', '--verbose', action='store_true', help='Visualiza o que o comando irá executar')
 analisador.add_argument('porta', type=int)
 analisador.add_argument('protocolo', choices=('tcp', 'udp'))
 
@@ -16,7 +17,6 @@ args = analisador.parse_args()
 interface = 'any'
 protocolo = args.protocolo
 porta = args.porta
-verboso = args.verbose
 
 filtro = f'{protocolo} port {porta}'
 
@@ -26,17 +26,23 @@ nome_arq_captura = f"captura_{protocolo}_{porta}_em_{agora.strftime('%F-às-%T')
 dir_captura = pathlib.Path(DIR_CAPTURAS)
 caminho_arq_captura = dir_captura / nome_arq_captura
 
+def muda_perm():
+    global caminho_arq_captura
+    os.chmod(caminho_arq_captura, mode=0o0644)
+    print(f'Captura salva em: {caminho_arq_captura}')
+
+atexit.register(muda_perm)    
+
 cmd = 'tshark'
 cmd_args = [
     '-i', interface,
     '-f', f'{filtro}',
-    '-c', '30',
     '-w', caminho_arq_captura.as_posix(),
 ]
 
+print("Pressione CTRL+C para cancelar a captura.")
 cmd_e_args = [cmd]+cmd_args
-if verboso:
-    print(' '.join(cmd_e_args))
+print(' '.join(cmd_e_args))
 
 resultado = subprocess.run(cmd_e_args, stdout=subprocess.PIPE)
 print(resultado)
