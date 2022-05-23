@@ -33,6 +33,7 @@ def main():
         print()
         for a in args:
             print(f'{a.num}. `{a.arg}`')
+            print()
             print(f'{" "*(len(str(a.num))+2)} Explicação')
             print()
 
