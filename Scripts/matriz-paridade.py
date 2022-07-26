@@ -9,7 +9,7 @@ def utf8_para_ascii(cadeia: str) -> str:
 
 prep_port = 'e de da do de das dos'.split()
 
-nome = 'Fulano de Tal Pereira da Silva'
+# nome = 'Fulano de Tal Pereira da Silva'
 
 # TODO: Transformar nome da codificação UTF-8 para ASCII
 
@@ -17,9 +17,9 @@ nome = 'Fulano de Tal Pereira da Silva'
 # nome = input('Seu nome completo: ') if (len(sys.argv) != 2) else sys.argv[1]
 
 # Opção 2: Extrair os dados da conta do usuário no Unix/Linux
-# usuario = getuser()
-# dados_usuario = pwd.getpwnam(usuario)
-# nome,matricula = dados_usuario.split(',')
+usuario = getuser()
+dados_usuario = pwd.getpwnam(usuario)
+nome,matricula = dados_usuario.split(',')
 
 nome_quebrado = utf8_para_ascii(nome).title().split()
 
