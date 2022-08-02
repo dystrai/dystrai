@@ -2,6 +2,9 @@
 '''
 Save Markdown page with title and link for an URL
 '''
+
+from argparse import ArgumentParser
+from getpass import getuser
 import os
 import sys
 from urllib.parse import urlparse, parse_qs
@@ -9,6 +12,18 @@ from urllib.parse import urlparse, parse_qs
 from bs4 import BeautifulSoup
 import requests
 from slugify import slugify
+
+global usuario
+usuario = getuser()
+
+# Based on: https://stackoverflow.com/questions/7160737/how-to-validate-a-url-in-python-malformed-or-not
+def uri_validator(url: str) -> bool:
+
+    try:
+        resultado = urlparse(url)
+        return all([resultado.scheme, resultado.netloc])
+    except:
+        return False
 
 def emb_youtube_video(v: str):
 
@@ -26,7 +41,7 @@ def emb_youtube_video(v: str):
 '''
 
 
-def save_page_link(url: str):
+def save_page_link(url: str, guardar_usuario: bool):
     req = requests.get(url)
     url_analisada = urlparse(url)
 
@@ -37,8 +52,12 @@ def save_page_link(url: str):
         else:
             title = html.find_all('title')[0].contents[0]
 
-        slug = slugify(title)
-        fname = f'{slug}.md'
+        slug_title = slugify(title)
+        if guardar_usuario:
+            slug_user = slugify(usuario)
+            fname = f'{slug_user}_{slug_title}.md'
+        else:
+            fname = f'{slug_title}.md'
 
         with open(fname, 'w', encoding='utf-8') as page:
             page.write(f'''# {title}
@@ -53,16 +72,28 @@ def save_page_link(url: str):
         print(f'Link salvo no arquivo: {fname}')
 
 def main():
-    if len(sys.argv) > 1:
-        for url in sys.argv[1:]:
-            save_page_link(url)
+
+    analisador_args = ArgumentParser()
+    analisador_args.add_argument('-u', '--usuario', help='Insere nome do usuário no início do nome do arquivo', action="store_true")
+    analisador_args.add_argument('url', nargs='*', help='URL a ser analisada')
+
+    # DEBUG
+    global args
+    args = analisador_args.parse_args()
+
+    if len(args.url) > 0:
+        for url in args.url:
+            save_page_link(url, guardar_usuario=args.usuario)
     else:
         try:
             while (url := input('URL: ')):
-                save_page_link(url)
+                save_page_link(url, guardar_usuario=args.usuario)
         except EOFError as erro:
             pass        
-
+        except KeyboardInterrupt as erro:
+            pass
+        except:
+            pass
 
 if __name__ == '__main__':
     main()
