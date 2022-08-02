@@ -4,14 +4,33 @@ Save Markdown page with title and link for an URL
 '''
 import os
 import sys
+from urllib.parse import urlparse, parse_qs
 
 from bs4 import BeautifulSoup
 import requests
 from slugify import slugify
 
+def emb_youtube_video(v: str):
+
+    return f'''\
+<iframe 
+        width="560" 
+        height="315" 
+        src="https://www.youtube.com/embed/{v}" 
+        title="YouTube video player" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen
+        >
+</iframe>    
+'''
+
+
 def save_page_link(url: str):
     req = requests.get(url)
-    if 'text/html' in req.headers['Content-type']:
+    url_analisada = urlparse(url)
+
+    if req.ok and 'text/html' in req.headers['Content-type']:
         html = BeautifulSoup(req.content, 'html.parser')
         if html.text.title is None:
             title = html.head.title.text.strip()
@@ -26,6 +45,10 @@ def save_page_link(url: str):
 
 \<<{req.url}>\>
 ''')
+            if url_analisada.hostname == 'www.youtube.com':
+                qs_analisada = parse_qs(url_analisada.query)
+                if 'v' in qs_analisada:
+                    page.write(f'\n\n{emb_youtube_video({qs_analisada["v"][0]})}\n')
 
         print(f'Link salvo no arquivo: {fname}')
 
