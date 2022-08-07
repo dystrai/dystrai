@@ -69,6 +69,10 @@ def save_page_link(url: str, guardar_usuario: bool):
                 if 'v' in qs_analisada:
                     page.write(f'\n\n{emb_youtube_video({qs_analisada["v"][0]})}\n')
 
+            page.write('''\n\n## Anotações
+
+''')
+
         print(f'Link salvo no arquivo: {fname}')
 
 def main():
