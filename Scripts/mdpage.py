@@ -67,7 +67,7 @@ def save_page_link(url: str, guardar_usuario: bool):
             if url_analisada.hostname == 'www.youtube.com':
                 qs_analisada = parse_qs(url_analisada.query)
                 if 'v' in qs_analisada:
-                    page.write(f'\n\n{emb_youtube_video({qs_analisada["v"][0]})}\n')
+                    page.write(f'\n\n{emb_youtube_video(qs_analisada["v"][0])}\n')
 
             page.write('''\n\n## Anotações
 
