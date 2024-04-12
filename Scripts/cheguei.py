@@ -131,7 +131,7 @@ def registrar_presenca_windows() -> None:
         'pc': num_pc
     }
     dados_presenca_codificados = urlencode(dados_presenca)
-    url_presenca = f'{URL_CHAMADA}/registrar/{dados_presenca_codificados}'
+    url_presenca = f'{URL_CHAMADA}/registrar/?{dados_presenca_codificados}'
     webbrowser.open(url=url_presenca)
     
 
