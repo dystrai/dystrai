@@ -7,17 +7,18 @@
 # - [ ] Registrar presença
 # - [ ] Salvar parte do nome e o animal escolhido em arquivo (YAML, JSON, INI?)
 
-import webbrowser
 from configparser import ConfigParser
-import ctypes
 from datetime import datetime
-import platform
 from getpass import getuser
-import os
 from pathlib import Path
+from socket import gethostname
+from urllib.parse import quote, urlencode
+import ctypes
+import os
+import platform
 import re
 import sys
-from urllib.parse import quote, urlencode
+import webbrowser
 
 # Bibliotecas externas
 # Comentar as próximas 2 linhas
@@ -127,7 +128,7 @@ def registrar_presenca_windows() -> None:
         'matricula': usuario,
         'nome': nome,
         'nome_preferido': nome_pref,
-        'hostname': os.environ.get(key='COMPUTERNAME', default='DESCONHECIDO'),
+        'hostname': gethostname(),
         'pc': num_pc
     }
     dados_presenca_codificados = urlencode(dados_presenca)
