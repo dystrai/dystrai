@@ -22,27 +22,33 @@ import webbrowser
 
 # Bibliotecas externas
 # Comentar as próximas 2 linhas
-# import requests
-# from unidecode import unidecode
+import requests
+from unidecode import unidecode
 
-bibliotecas = 'requests unidecode'.split()
-bib_faltantes: list[str] = []
-for bib in bibliotecas:
-    try:
-        __import__(bib)
-    except:
-        bib_faltantes.append(bib)
+# bibliotecas = 'requests unidecode'.split()
+# bib_faltantes: list[str] = []
+# for bib in bibliotecas:
+#     try:
+#         __import__(bib)
+#     except:
+#         bib_faltantes.append(bib)
 
-if bib_faltantes:
-    print(f'Falha ao importar a(s) biblioteca(s): {", ".join(bib_faltantes)}.')
-    print('Por gentileza, instale-a(s). Execute:')
-    print(f'\tpip install {" ".join(bib_faltantes)}')
-    sys.exit(1)
+# if bib_faltantes:
+#     print(f'Falha ao importar a(s) biblioteca(s): {", ".join(bib_faltantes)}.')
+#     print('Por gentileza, instale-a(s). Execute:')
+#     print(f'\tpip install {" ".join(bib_faltantes)}')
+#     sys.exit(1)
 
 PREPOSICOES = ["de", "da", "do", "dos", "das", "e"]
 URL_BANNER = "https://mange.ifrn.edu.br/ascii/arte/figlet.php"
-URL_CHAMADA = "https://chamada.mange.ifrn.edu.br"
+URL_CHAMADA = "http://oulu/cgi-bin/chamada"
 URL_IP = "https://mange.ifrn.edu.br/ip/"
+
+global USUARIO
+USUARIO = getuser()
+
+global DYMON_CONF
+DYMON_CONF = Path.home() / '.config' / 'dymon' / 'dymon.conf'
 
 def saudacao() -> str:
     agora = datetime.now()
@@ -101,39 +107,56 @@ def obter_nome_completo_windows():
     return nameBuffer.value
 
 def salvar_nome(nome_pref: str, nome_completo: str) -> None:
-    home = Path().home
-    dymon_conf_dir = home() / '.config' / 'dymon'
+    dymon_conf_dir = DYMON_CONF.parent
     os.makedirs(dymon_conf_dir, exist_ok=True)
-    dymon_conf_file: Path = dymon_conf_dir / 'dymon.conf'
+    dymon_conf_file: Path = DYMON_CONF
 
     config: ConfigParser = ConfigParser()
     config['usuario'] = {}
     config['usuario']['chamar'] = nome_pref
+    config['usuario']['matricula'] = USUARIO
+    config['usuario']['nome'] = nome_completo
+    config['usuario']['nome_preferido'] = nome_completo
+    config['usuario']['hostname'] = gethostname(),
+
     with dymon_conf_file.open(mode='w', encoding='utf-8') as obj_dymon_conf:
         config.write(obj_dymon_conf)
 
 
 def registrar_presenca_windows() -> None:
-    usuario = getuser()
-    nome = obter_nome_completo_windows()
-    nome_pref = escolher_parte_nome(nome)
-    salvar_nome(nome_pref=nome_pref, nome_completo=nome)
-    saudar(nome_pref)
+    if DYMON_CONF.exists():
+        config = ConfigParser.read(DYMON_CONF)
+        dados_presenca = {
+            'matricula': usuario,
+            'nome': nome,
+            'nome_preferido': nome_pref,
+            'hostname': gethostname(),
+            'pc': num_pc            
+        }
+    else:
+        usuario = getuser()
+        nome = obter_nome_completo_windows()
+        nome_pref = escolher_parte_nome(nome)
+        salvar_nome(nome_pref=nome_pref, nome_completo=nome)
+        saudar(nome_pref)
 
-    num_pc = input('Entre com número de seu PC: ')
-    while not num_pc.isdigit():
         num_pc = input('Entre com número de seu PC: ')
+        while not num_pc.isdigit():
+            num_pc = input('Entre com número de seu PC: ')
 
-    dados_presenca = {
-        'matricula': usuario,
-        'nome': nome,
-        'nome_preferido': nome_pref,
-        'hostname': gethostname(),
-        'pc': num_pc
-    }
+        dados_presenca = {
+            'matricula': usuario,
+            'nome': nome,
+            'nome_preferido': nome_pref,
+            'hostname': gethostname(),
+            'pc': num_pc
+        }
     dados_presenca_codificados = urlencode(dados_presenca)
-    url_presenca = f'{URL_CHAMADA}/registrar/?{dados_presenca_codificados}'
-    webbrowser.open(url=url_presenca)
+    url_presenca = f'{URL_CHAMADA}?{dados_presenca_codificados}'
+
+    # https://www.geeksforgeeks.org/how-to-open-url-in-firefox-browser-from-python-application/
+    firefox = webbrowser.Mozilla("C:/Program Files/Mozilla Firefox/firefox.exe")
+    firefox.open(url=url_presenca)
     
 
 def registrar_presenca_linux():
@@ -156,7 +179,7 @@ def main():
             registrar_presenca_linux()
 
         case _:
-            print(f'O sistema {so} ainda não é suportado')
+            print(f'O sistema operacional {so} ainda não é suportado')
 
 if __name__ == '__main__':
     main()
