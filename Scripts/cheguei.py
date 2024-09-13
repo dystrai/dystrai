@@ -22,8 +22,8 @@ import webbrowser
 
 # Bibliotecas externas
 # Comentar as próximas 2 linhas
-import requests
-from unidecode import unidecode
+# import requests
+# from unidecode import unidecode
 
 bibliotecas = 'requests unidecode'.split()
 bib_faltantes: list[str] = []
