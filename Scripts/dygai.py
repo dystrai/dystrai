@@ -26,11 +26,11 @@ def main():
         print("Entrada inválida. Mantendo a taxa padrão atual.")
     
     # Enter text to speak
-    print("Entre com o texto a ser falado. Digite 'exit' para sair.")
+    print("Entre com o texto a ser falado. Digite 'sair' para sair.")
     while True:
         text = input(">>> ")
-        if text.lower() == 'exit':
-            print("Exiting TTS.")
+        if text.lower() == 'sair':
+            print("Saindo do conversor de texto para fala.")
             break
         sapi_voice.Speak(text)
 
