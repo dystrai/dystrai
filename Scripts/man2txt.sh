@@ -3,16 +3,20 @@
 if [ "$#" -ne 2 ]; then
     cat << EOF
 Usage:
-  $1 SECTION COMMAND
+  $0 SEÇÃO PÁGINA
 EOF
     exit 1
 fi
 
-if [ -f "${cmd}.md" ]; then
+SECTION="${1}"
+PAGE="${2}"
+DOC_ID="${PAGE}-${SECTION}"
+
+if [[ -f "${DOC_ID}.md" ]]; then
     echo "Arquivo de ajuda já encontrado para comando ${cmd}: <${cmd}.md>."
 else
-cat << EOF > ${cmd}.md
-(${2}-${1})=
+    cat << EOF > "${DOC_ID}.md
+(${DOC_ID})=
 
 # ${$2}(${1})
 
