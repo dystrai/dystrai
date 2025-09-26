@@ -8,6 +8,7 @@ import getpass
 import pathlib
 import pwd
 import string
+import sys
 
 import prettytable
 import yaml
@@ -77,7 +78,28 @@ class Animal:
         else:
             animal = arq_animal_usuario.open(encoding='utf-8').read()
             print(f'{prim_nome_usuario}, o animal {animal} já está reservado para você em {disciplina.upper()}.')
-            
+ 
+    def info(self, disciplina:str):
+        """Obtem informações sobre o animal associado à disciplina.
+
+        Args:
+            disciplina (str): Abreviação ou sigla da disciplina
+        """
+        usuario = getpass.getuser()
+        nome_usuario = pwd.getpwnam(usuario).pw_gecos.split(',')[0]
+        prim_nome_usuario = nome_usuario.split()[0]
+        
+        dir_animais = pathlib.Path('/srv/disc', disciplina, 'animal')        
+        arq_animal_usuario = dir_animais / 'por-usuario' / f'{usuario}'
+
+        if arq_animal_usuario.exists():
+            animal = arq_animal_usuario.open(encoding='utf-8').read()
+            print(animal)
+            sys.exit(0)
+        else:
+            print(f'{prim_nome_usuario}, não há nenhum animal associado a você em {disciplina.upper()}')
+            sys.exit(1)
+           
     def cancelar(self, disciplina:str):
         """Cancela o animal associado à disciplina.
 
@@ -101,6 +123,8 @@ class Animal:
             print(f'{prim_nome_usuario}, o animal {animal} foi cancelado para você em {disciplina.upper()}.')
             
     def disciplinas(self, formato='tabela'):
+        """Lista as disciplinas.
+        """
         
         # TODO: Varrer diretórios em "/srv/disc"
         #       Para cada sub-diretório, abrir conteúdo do arquivo "info.yaml" (sigla, nome, ano, período, professor, curso)
@@ -122,6 +146,6 @@ class Animal:
             
 
 if __name__ == '__main__':
-    fire.Fire(Animal())
+    fogo = fire.Fire(Animal())
 
     
