@@ -1,6 +1,6 @@
 #!/bin/bash
-# Script: bateria-saude.sh
-# Calcula a saúde da bateria no Linux
+# Script: bateria-check.sh
+# Mostra saúde da bateria e recomendação
 
 BAT="/sys/class/power_supply/BAT0"
 
@@ -17,9 +17,19 @@ if [ -d "$BAT" ]; then
     fi
 
     SAUDE=$(echo "scale=2; $FULL / $DESIGN * 100" | bc)
-    echo "Saúde da bateria: $SAUDE %"
-    echo "Capacidade atual: $FULL"
-    echo "Capacidade de fábrica: $DESIGN"
+
+    echo "Capacidade de fábrica : $DESIGN"
+    echo "Capacidade atual      : $FULL"
+    echo "Saúde da bateria      : $SAUDE %"
+
+    # Recomendação
+    if (( $(echo "$SAUDE >= 80" | bc -l) )); then
+        echo "Situação: ✅ Bateria saudável"
+    elif (( $(echo "$SAUDE >= 60" | bc -l) )); then
+        echo "Situação: ⚠️  Atenção — autonomia reduzida"
+    else
+        echo "Situação: ❌ Troca recomendada"
+    fi
 else
     echo "Nenhuma bateria encontrada em $BAT"
 fi
