@@ -31,10 +31,12 @@ def main():
             estudante = Estudante(linha['Usuário'], linha['Matrícula'], linha['Nome'], linha['E-mail escolar'])
             estudantes[estudante.usuario] = estudante
             cmd1 = f"useradd -m -s /bin/zsh -c '{estudante.nome}' {estudante.usuario}"
+            print(cmd1)
             cmd1_args = shlex.split(cmd1)
             subprocess.run(args=cmd1_args)
-            cmd2 = "chpasswd"
+            cmd2 = "chpasswd"           
             cmd2_input = f"{estudante.usuario}:{estudante.matricula}"
+            print(f"echo {cmd2_input} | {cmd2}")
             cmd2_args = shlex.split(cmd2)
             subprocess.run(args=cmd2_args, input=cmd2_input, text=True)
 
@@ -51,12 +53,14 @@ def main():
             n_grupos = len(grupos)
 
             for g in grupos:
-                cmd3 = f"groupadd {g}" 
+                cmd3 = f"groupadd {g}"
+                print(cmd3)
                 cmd3_args = shlex.split(cmd3)
                 subprocess.run(args=cmd3_args)
 
             for i,e in enumerate(estudantes.values()):
-                cmd4 = f"gpasswd -a {e.usuario} {grupos[i%n_grupos]}" 
+                cmd4 = f"gpasswd -a {e.usuario} {grupos[i%n_grupos]}"
+                print(cmd4)
                 cmd4_args = shlex.split(cmd4)
                 subprocess.run(args=cmd4_args)
 
