@@ -7,7 +7,6 @@ from dataclasses import dataclass
 import pathlib
 import shlex
 import subprocess
-import sys
 
 @dataclass
 class Estudante:
@@ -17,13 +16,15 @@ class Estudante:
     email: str
 
 def main():
-    analisador: argparse.ArgumentParser = argparse.ArgumentParser('crug')
+    analisador: argparse.ArgumentParser = argparse.ArgumentParser(prog='crug')
     analisador.add_argument('csv', help='Arquivo CSV com campos ["Usuário", "Matrícula", "Nome", "E-mail escolar"]')
     argumentos: argparse.Namespace = analisador.parse_args()
 
     caminho_csv: pathlib.Path = pathlib.Path(argumentos.csv)
     if caminho_csv.exists() and caminho_csv.is_file():
-        leitor = csv.DictReader(caminho_csv.open(mode='r', encoding='utf-8'))
+        leitor: csv.DictReader = csv.DictReader(caminho_csv.open(mode='r', encoding='utf-8'))
+        cabecalhos_necessarios = {'Usuário', 'Matrícula', 'Nome', 'E-mail escolar'}
+        assert cabecalhos_necessarios.issubset(set(leitor.fieldnames)), "O arquivo CSV deve conter os campos: Usuário, Matrícula, Nome, E-mail escolar"
         estudantes = {}
 
         for linha in leitor:
@@ -35,7 +36,7 @@ def main():
             cmd2 = "chpasswd"
             cmd2_input = f"{estudante.usuario}:{estudante.matricula}"
             cmd2_args = shlex.split(cmd2)
-            subprocess.run(args=cmd2_args, input=cmd2_input)
+            subprocess.run(args=cmd2_args, input=cmd2_input, text=True)
 
         tipos_grupos = [
                 'estudante',
