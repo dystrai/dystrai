@@ -45,7 +45,8 @@ def main():
                 'yin yang',
                 'pedra papel tesoura',
                 'circulo triangulo quadrado pentagono hexagono',
-                'vermelho laranja amarelo verde azul anil violeta'
+                'vermelho laranja amarelo verde azul anil violeta',
+                'alfa beta gama delta teta iota omicron sigma tau upsilon omega',
                 ]
 
         for t in tipos_grupos:
