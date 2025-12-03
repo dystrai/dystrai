@@ -5,6 +5,7 @@ import argparse
 import csv
 from dataclasses import dataclass
 import pathlib
+import random
 import shlex
 import subprocess
 
@@ -17,24 +18,31 @@ class Estudante:
 
 def main():
     analisador: argparse.ArgumentParser = argparse.ArgumentParser(prog='crug')
-    analisador.add_argument('csv', help='Arquivo CSV com campos ["Usuário", "Matrícula", "Nome", "E-mail escolar"]')
+    analisador.add_argument('csv', help='Arquivo CSV com campos ["Usuario", "Matricula", "Nome", "Email"]')
     argumentos: argparse.Namespace = analisador.parse_args()
 
     caminho_csv: pathlib.Path = pathlib.Path(argumentos.csv)
     if caminho_csv.exists() and caminho_csv.is_file():
         leitor: csv.DictReader = csv.DictReader(caminho_csv.open(mode='r', encoding='utf-8'))
-        cabecalhos_necessarios = {'Usuário', 'Matrícula', 'Nome', 'E-mail escolar'}
+        cabecalhos_necessarios = {'Usuario', 'Matricula', 'Nome', 'Email'}
         assert cabecalhos_necessarios.issubset(set(leitor.fieldnames)), "O arquivo CSV deve conter os campos: Usuário, Matrícula, Nome, E-mail escolar"
         estudantes = {}
 
         for linha in leitor:
-            estudante = Estudante(linha['Usuário'], linha['Matrícula'], linha['Nome'], linha['E-mail escolar'])
+            estudante = Estudante(linha['Usuario'], linha['Matricula'], linha['Nome'], linha['Email'])
             estudantes[estudante.usuario] = estudante
+
+        lista_estudantes = list(estudantes.values())
+        random.shuffle(lista_estudantes)
+        random.shuffle(lista_estudantes)
+        random.shuffle(lista_estudantes)
+
+        for estudante in lista_estudantes:
             cmd1 = f"useradd -m -s /bin/zsh -c '{estudante.nome}' {estudante.usuario}"
             print(cmd1)
             cmd1_args = shlex.split(cmd1)
             subprocess.run(args=cmd1_args)
-            cmd2 = "chpasswd"           
+            cmd2 = "chpasswd"
             cmd2_input = f"{estudante.usuario}:{estudante.matricula}"
             print(f"echo {cmd2_input} | {cmd2}")
             cmd2_args = shlex.split(cmd2)
@@ -59,7 +67,7 @@ def main():
                 cmd3_args = shlex.split(cmd3)
                 subprocess.run(args=cmd3_args)
 
-            for i,e in enumerate(estudantes.values()):
+            for i,e in enumerate(lista_estudantes):
                 cmd4 = f"gpasswd -a {e.usuario} {grupos[i%n_grupos]}"
                 print(cmd4)
                 cmd4_args = shlex.split(cmd4)
