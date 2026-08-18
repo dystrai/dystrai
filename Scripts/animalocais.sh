@@ -98,14 +98,14 @@ while IFS=',' read -r emoji english portugues shortcode
 
         echo "Criando usuário: $portugues ($english)"
 
-        echo adduser \
+        adduser \
             -D \
             -h "/home/$portugues" \
             -s /bin/zsh \
             -g "${portugues},${english},${emoji}" \
             "$portugues"
 
-        echo "${portugues}:${english}" '|' chpasswd
-        echo chage -d 0 "${portugues}"
+        echo "${portugues}:${english}" | chpasswd
+        chage -d 0 "${portugues}"
 
     done
