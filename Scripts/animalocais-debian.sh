@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Cria contas locais no Alpine Linux com nome de animais em português
+# Cria contas locais no Debian GNU/Linux com nome de animais em português
 
 cat << 'FIM' | 
 🐜,ant,formiga,:ant:
@@ -98,11 +98,11 @@ while IFS=',' read -r emoji english portugues shortcode
 
         echo "Criando usuário: $portugues ($english)"
 
-        adduser \
-            -D \
-            -h "/home/$portugues" \
+        useradd \
+            -m \
+            -d "/home/$portugues" \
             -s /bin/zsh \
-            -g "${portugues},${english},${emoji}" \
+            -c "${portugues},${english},${emoji}" \
             "$portugues"
 
         echo "${portugues}:${english}" | chpasswd
