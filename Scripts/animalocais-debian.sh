@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Cria contas locais no Debian GNU/Linux com nome de animais em português
+GRUPO="animal"
 
 # Cria o grupo se ainda não existir
 if ! getent group "$GRUPO" >/dev/null 2>&1; then
