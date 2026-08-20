@@ -2,6 +2,11 @@
 
 # Cria contas locais no Debian GNU/Linux com nome de animais em português
 
+# Cria o grupo se ainda não existir
+if ! getent group "$GRUPO" >/dev/null 2>&1; then
+    addgroup "$GRUPO"
+fi
+
 cat << 'FIM' | 
 🐜,ant,formiga,:ant:
 🦡,badger,texugo,:badger:
@@ -108,4 +113,5 @@ while IFS=',' read -r emoji english portugues shortcode
         echo "${portugues}:${english}" | chpasswd
         chage -d 0 "${portugues}"
 
+        usermod -aG animal "${portugues}"
     done
