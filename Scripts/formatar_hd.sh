@@ -1,5 +1,11 @@
 #!/bin/bash -xv
 
+# 1. Verifica se o script está sendo executado como root
+if [ "$EUID" -ne 0 ]; then
+  echo "Erro: Este script precisa ser executado como root (use sudo)."
+  exit 1
+fi
+
 shopt -s nullglob
 
 DISCOS=(/dev/sd[a-z])
@@ -20,12 +26,6 @@ select disco in "${DISCOS[@]}"; do
     esac
 done
 PARTICAO="${DISCO}1"
-
-# 1. Verifica se o script está sendo executado como root
-if [ "$EUID" -ne 0 ]; then
-  echo "Erro: Este script precisa ser executado como root (use sudo)."
-  exit 1
-fi
 
 # 2. Confirmação de segurança
 echo "==========================================================="
